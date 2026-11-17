@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Loader2, X } from "lucide-react";
 import { useApp } from "@/lib/progress/store";
+import { LogoMark } from "@/components/brand/logo";
 
 export function LoginDialog({ onClose }: { onClose: () => void }) {
   const { login, register, loginGoogle } = useApp();
@@ -43,6 +44,7 @@ export function LoginDialog({ onClose }: { onClose: () => void }) {
         <button type="button" onClick={onClose} aria-label="Đóng" className="absolute right-3 top-3 rounded-lg p-2 text-muted hover:bg-ground">
           <X size={18} />
         </button>
+        <LogoMark size={44} />
         <div className="flex flex-col gap-1">
           <h2 id="login-title" className="font-display text-xl font-extrabold">{mode === "login" ? "Đăng nhập" : "Tạo tài khoản"}</h2>
           <p className="text-sm text-muted">Dùng chung tài khoản với web học tiếng Anh. Tiến độ học thử trên máy này sẽ được gộp vào.</p>

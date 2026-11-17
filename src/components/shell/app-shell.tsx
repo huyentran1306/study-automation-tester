@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { Sidebar } from "./sidebar";
 import { LoginDialog } from "./login-dialog";
+import { Logo } from "@/components/brand/logo";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
@@ -18,7 +19,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col lg:flex-row">
       <header className="sticky top-0 z-30 flex items-center justify-between border-b border-line bg-white/95 px-4 py-2 backdrop-blur lg:hidden">
-        <span className="font-display text-lg font-extrabold">PlayForge</span>
+        <Logo size={30} sub={false} />
         <button type="button" aria-label={open ? "Đóng menu" : "Mở menu"} className="btn-ghost h-11 w-11 px-0" onClick={() => setOpen((v) => !v)}>
           {open ? <X size={18} /> : <Menu size={18} />}
         </button>

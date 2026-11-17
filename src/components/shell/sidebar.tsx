@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, Code2, Crosshair, Home, Layers, LogIn, Package, Repeat, Route, Star, Terminal, User, ArrowLeftRight } from "lucide-react";
+import { BookOpen, Code2, Crosshair, Home, Layers, LogIn, Package, Repeat, Route, Star, User, ArrowLeftRight } from "lucide-react";
+import { Logo } from "@/components/brand/logo";
 import { useApp } from "@/lib/progress/store";
 import { computeXp, levelOf, streakOf } from "@/lib/progress/state";
 import { SyncBadge } from "./sync-badge";
@@ -47,14 +48,8 @@ export function Sidebar({ onLogin }: { onLogin: () => void }) {
 
   return (
     <nav aria-label="Điều hướng chính" className="flex h-full flex-col gap-4 overflow-y-auto border-r border-line bg-white px-3.5 py-5">
-      <Link href="/" className="flex items-center gap-2.5 rounded-lg px-2 py-1.5">
-        <span className="flex h-[34px] w-[34px] items-center justify-center rounded-[9px] bg-brand text-white">
-          <Terminal size={19} strokeWidth={2.2} />
-        </span>
-        <span className="flex flex-col leading-tight">
-          <span className="font-display text-[19px] font-extrabold tracking-tight">PlayForge</span>
-          <span className="text-[11px] text-muted">Xưởng luyện Automation</span>
-        </span>
+      <Link href="/" aria-label="PlayForge, về trang chủ" className="rounded-lg px-2 py-1.5">
+        <Logo size={36} />
       </Link>
 
       {GROUPS.map((g) => (
