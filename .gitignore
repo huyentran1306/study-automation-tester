@@ -1,0 +1,12 @@
+/node_modules
+/.next/
+/.open-next/
+/.wrangler/
+/out/
+.DS_Store
+*.pem
+npm-debug.log*
+.env*.local
+.dev.vars
+*.tsbuildinfo
+next-env.d.ts

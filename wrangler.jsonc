@@ -1,0 +1,33 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "main": ".open-next/worker.js",
+  "name": "playforge",
+  "compatibility_date": "2026-04-24",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
+  // Workers AI cho Mentor AI (giải thích lỗi, trả lời câu hỏi về bài).
+  "ai": { "binding": "AI" },
+  // Database D1 riêng của PlayForge, không dùng chung với app nào khác.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "playforge-db",
+      "database_id": "1e10e2fc-25e9-4636-91d5-1f94972bfc15",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "observability": { "enabled": true },
+  // Môi trường cho `next dev`: chỉ D1 local, không có AI (AI binding luôn cần đăng nhập Cloudflare).
+  "env": {
+    "local": {
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "playforge-db",
+          "database_id": "1e10e2fc-25e9-4636-91d5-1f94972bfc15",
+          "migrations_dir": "migrations"
+        }
+      ]
+    }
+  }
+}

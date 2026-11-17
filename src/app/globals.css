@@ -1,0 +1,86 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  background: #f6f8fb;
+  color: #1c2433;
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+:focus-visible {
+  outline: 2px solid #2563c9;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Tắt ligature: học viên phải thấy rõ == / === / != / !== / => */
+code,
+pre,
+kbd,
+.font-mono {
+  font-variant-ligatures: none;
+  font-feature-settings: "liga" 0, "calt" 0;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@layer components {
+  .card {
+    @apply rounded-2xl border border-line bg-white;
+  }
+  .btn {
+    @apply inline-flex min-h-[40px] items-center justify-center gap-2 rounded-[10px] px-4 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply btn bg-brand text-white hover:bg-brand-dark;
+  }
+  .btn-dark {
+    @apply btn bg-ink text-white hover:bg-ink-2;
+  }
+  .btn-ghost {
+    @apply btn border border-line bg-white text-ink-3 hover:border-brand-ring hover:text-brand-dark;
+  }
+  .btn-ai {
+    @apply btn border border-ai-edge bg-ai-soft text-ai-dark hover:bg-ai-tint;
+  }
+  .pill {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold;
+  }
+  .eyebrow {
+    @apply text-xs font-bold uppercase tracking-[0.06em];
+  }
+  .code-inline {
+    @apply rounded-md bg-chip px-1.5 py-0.5 font-mono text-[0.85em];
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.pf-error-line {
+  background: #fdf3f2;
+}
+.pf-error-glyph {
+  background: #b42318;
+  width: 4px !important;
+  margin-left: 3px;
+}
