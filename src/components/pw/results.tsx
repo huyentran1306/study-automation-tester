@@ -6,7 +6,7 @@ import type { TraceStep } from "@/lib/pw/host";
 import type { LiveTest } from "./use-pw-runner";
 import type { PwOutcome } from "@/lib/runner/run";
 
-export function TestStatusList({ tests, out, running }: { tests: LiveTest[]; out: PwOutcome | null; running: boolean }) {
+export function TestStatusList({ tests, out, running, file, stale }: { tests: LiveTest[]; out: PwOutcome | null; running: boolean; file?: string; stale?: boolean }) {
   const res = out?.results ?? [];
   const pass = res.filter((r) => r.ok && !r.skipped).length;
   const fail = res.filter((r) => !r.ok).length;
@@ -14,7 +14,7 @@ export function TestStatusList({ tests, out, running }: { tests: LiveTest[]; out
   return (
     <div className="flex flex-col gap-1.5">
       <div className="flex items-center justify-between">
-        <span className="text-[13px] font-bold">Kết quả test</span>
+        <span className="min-w-0 truncate text-[13px] font-bold">Kết quả test{file && (out || running) ? <span className="font-mono text-[12px] font-semibold text-muted"> · {file.split("/").pop()}</span> : null}</span>
         {out ? (
           <span className={`pill ${fail || out.error ? "bg-bad-soft text-bad-dark" : "bg-ok-soft text-ok-dark"}`}>
             {pass} pass{fail ? ` · ${fail} fail` : ""}{skip ? ` · ${skip} skip` : ""} · {(out.ms / 1000).toFixed(1)}s
@@ -23,6 +23,7 @@ export function TestStatusList({ tests, out, running }: { tests: LiveTest[]; out
           <span className="pill bg-chip text-muted">{running ? "Đang chạy…" : "Chưa chạy"}</span>
         )}
       </div>
+      {stale && out && <div className="rounded-lg bg-chip px-2.5 py-1.5 text-xs text-ink-3">Đây là kết quả của <span className="font-mono">{file}</span>. Bấm Chạy để chạy tệp đang mở.</div>}
       {out?.violations.map((v) => <div key={v} className="rounded-lg bg-warn-soft px-2.5 py-1.5 text-xs text-warn-dark">Vi phạm luật: {v}</div>)}
       {out?.error && <pre className="whitespace-pre-wrap rounded-lg bg-bad-soft px-2.5 py-2 font-mono text-[11.5px] text-bad-dark">{out.error.name}: {out.error.message}{out.error.line ? `\n  ở dòng ${out.error.line}` : ""}</pre>}
       {tests.length === 0 && !running && !out && <span className="text-xs text-muted">Bấm Chạy để xem từng test pass hay fail.</span>}

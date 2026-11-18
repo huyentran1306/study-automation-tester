@@ -178,7 +178,7 @@ export default function ApiLab() {
 
   const optsCode = () => {
     const o: string[] = [];
-    const h = { ...authHeaders() };
+    const h: Record<string, string> = auth === "bearer" ? { Authorization: "Bearer <token>" } : { ...authHeaders() };
     headers.filter((x) => x.on && x.k).forEach((x) => { h[x.k] = x.v; });
     if (Object.keys(h).length) {
       const hs = Object.entries(h).map(([k, v]) => `${/^[a-zA-Z_]\w*$/.test(k) ? k : q(k)}: ${k === "Authorization" && auth === "bearer" ? "'Bearer ' + token" : q(v)}`);
@@ -201,6 +201,7 @@ export default function ApiLab() {
     const call = `const res = await request.${method.toLowerCase()}(${q(LAB_BASE + path)}${o.length ? `, {\n    ${o.join(",\n    ")},\n  }` : ""});`;
     const as = asserts.filter((a) => picked[a.id] || a.id === "json" && asserts.some((x) => x.id.startsWith("f:") && picked[x.id])).map((a) => "  " + a.code);
     const pre = auth === "bearer" ? "  const login = await request.post('/lab-api/v1/auth/login', {\n    data: { email: 'linh@sokhach.vn', password: 'Matkhau@123' },\n  });\n  const { token } = await login.json();\n\n" : "";
+    if (!as.length) as.push("  await expect(res).toBeOK(); // bấm Gửi trong API Lab để có thêm assertion gợi ý theo response thật");
     return `import { test, expect } from '@playwright/test';\n\ntest('${method} ${path}', async ({ request }) => {\n${pre}  ${call}\n${as.join("\n")}\n});\n`;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [method, path, params, headers, body, auth, asserts, picked]);

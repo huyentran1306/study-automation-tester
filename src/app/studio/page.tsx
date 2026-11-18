@@ -50,6 +50,8 @@ export default function Studio() {
   const [grep, setGrep] = useState("");
   const [bottom, setBottom] = useState<"trace" | "term" | "console">("trace");
   const [lastFile, setLastFile] = useState("");
+  // Kết quả "Chạy tất cả spec": mỗi file một dòng tổng hợp (pw.out chỉ giữ lượt cuối)
+  const [allRun, setAllRun] = useState<{ file: string; pass: number; fail: number; skip: number; error: boolean }[] | null>(null);
   const pw = usePwRunner();
 
   const [ready, setReady] = useState(false);
@@ -107,8 +109,10 @@ export default function Studio() {
         return;
       }
       setMsg("");
-      await pw.run({ code: p.files[target], files: others, grep: re });
+      if (!file) setAllRun(null);
+      const res = await pw.run({ code: p.files[target], files: others, grep: re });
       recordRun(2);
+      return res;
     },
     [p, grep, pw, recordRun],
   );
@@ -172,7 +176,16 @@ export default function Studio() {
                 Xem từng bước
               </label>
               {specs.length > 1 && (
-                <button type="button" className="btn-ghost min-h-[40px] text-[13px]" disabled={busy} onClick={async () => { for (const f of specs) { await runPw(f); } }}>
+                <button type="button" className="btn-ghost min-h-[40px] text-[13px]" disabled={busy} onClick={async () => {
+                  const rows: { file: string; pass: number; fail: number; skip: number; error: boolean }[] = [];
+                  setAllRun([]);
+                  for (const f of specs) {
+                    const r = await runPw(f);
+                    if (!r) continue;
+                    rows.push({ file: f, pass: r.results.filter((x) => x.ok && !x.skipped).length, fail: r.results.filter((x) => !x.ok).length, skip: r.results.filter((x) => x.skipped).length, error: !!r.error });
+                    setAllRun([...rows]);
+                  }
+                }}>
                   Chạy tất cả spec
                 </button>
               )}
@@ -216,7 +229,7 @@ export default function Studio() {
               <button type="button" onClick={() => removeFile(f)} className="hidden p-1 pr-2 text-muted hover:text-bad group-hover:block" aria-label={`Xóa ${f}`}><Trash2 size={12} /></button>
             </div>
           ))}
-          {mode === "pw" && <p className="mt-2 px-2 font-sans text-[11px] leading-relaxed text-muted">Tệp *.spec.ts là file test. Mở một spec rồi bấm Chạy. Các tệp khác được import qua lại như dự án thật.</p>}
+          {mode === "pw" && <p className="mt-2 px-2 font-sans text-[11px] leading-relaxed text-muted">Tệp *.spec.ts là file test. Mở một spec rồi bấm Chạy. Các tệp khác được import qua lại như dự án thật. Dự án mẫu có 1 test cố ý fail trong login.spec.ts để bạn tập sửa.</p>}
         </nav>
 
         <section className="card flex min-w-0 flex-1 flex-col overflow-hidden">
@@ -240,7 +253,19 @@ export default function Studio() {
           <section aria-label="Trình duyệt và kết quả" className="flex flex-col gap-3 xl:w-[460px] xl:flex-none">
             <BrowserFrame frameRef={pw.frameRef} url={pw.url} height={340} onHome={() => pw.navigate("/login")} />
             <div className="card max-h-[300px] overflow-auto p-3.5">
-              <TestStatusList tests={pw.tests} out={pw.out} running={pw.running} />
+              {allRun && (
+                <div className="mb-3 flex flex-col gap-1 border-b border-line2 pb-3">
+                  <span className="text-[13px] font-bold">Chạy tất cả spec</span>
+                  {allRun.map((r) => (
+                    <button key={r.file} type="button" onClick={() => setP({ ...p, active: r.file })} className="flex min-h-[28px] items-center justify-between gap-2 rounded-md px-1.5 text-left font-mono text-[12px] hover:bg-ground">
+                      <span className="truncate">{r.file}</span>
+                      <span className={`flex-none font-sans text-[11.5px] font-semibold ${r.fail || r.error ? "text-bad-dark" : "text-ok-dark"}`}>{r.error ? "lỗi" : `${r.pass} pass${r.fail ? ` · ${r.fail} fail` : ""}${r.skip ? ` · ${r.skip} skip` : ""}`}</span>
+                    </button>
+                  ))}
+                  {pw.running && <span className="px-1.5 text-[11.5px] text-muted">Đang chạy {lastFile}…</span>}
+                </div>
+              )}
+              <TestStatusList tests={pw.tests} out={pw.out} running={pw.running} file={lastFile} stale={!!lastFile && !pw.running && lastFile !== p.active && /\.spec\./.test(p.active)} />
             </div>
           </section>
         ) : (

@@ -105,7 +105,7 @@ declare module '@playwright/test' {
     toContain(v: unknown): void; toHaveLength(n: number): void; toHaveProperty(path: string, value?: unknown): void; toBeInstanceOf(c: unknown): void; toThrow(e?: Pattern): void;
     toBeGreaterThan(n: number): void; toBeGreaterThanOrEqual(n: number): void; toBeLessThan(n: number): void; toBeLessThanOrEqual(n: number): void; toBeCloseTo(n: number, digits?: number): void; toMatch(p: Pattern): void;
   }
-  interface ResponseMatchers extends ValueMatchers { toBeOK(): void }
+  interface ResponseMatchers extends ValueMatchers { toBeOK(): Promise<void> }
   interface Expect {
     (actual: Locator, o?: Timeout): LocatorMatchers & { not: LocatorMatchers };
     (actual: Page, o?: Timeout): PageMatchers & { not: PageMatchers };

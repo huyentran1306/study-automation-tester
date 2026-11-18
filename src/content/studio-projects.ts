@@ -123,7 +123,7 @@ test.describe('Đăng nhập Sổ Khách', () => {
   });
 
   test('sai mật khẩu thì báo lỗi', async ({ loginPage }) => {
-    // TODO: test này đang fail. Còn thiếu gì ở đây?
+    // BÀI TẬP: test này cố ý fail để bạn tập sửa. Đọc lỗi ở khung Kết quả: còn thiếu bước nào?
     await loginPage.login('linh@sokhach.vn', 'sai-mat-khau');
     await expect(loginPage.errorMessage).toHaveText('Email hoặc mật khẩu không đúng');
   });
