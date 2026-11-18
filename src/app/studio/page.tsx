@@ -225,8 +225,8 @@ export default function Studio() {
                 <span className={`truncate ${p.active === f ? "font-bold" : ""}`}>{f}</span>
                 {mode === "js" && p.entry === f && <span className="ml-auto flex-none rounded bg-ok-soft px-1 text-[10px] font-bold text-ok-dark">chạy</span>}
               </button>
-              <button type="button" onClick={() => renameFile(f)} className="hidden p-1 text-muted hover:text-brand group-hover:block" aria-label={`Đổi tên ${f}`}><Pencil size={12} /></button>
-              <button type="button" onClick={() => removeFile(f)} className="hidden p-1 pr-2 text-muted hover:text-bad group-hover:block" aria-label={`Xóa ${f}`}><Trash2 size={12} /></button>
+              <button type="button" onClick={() => renameFile(f)} className={`${p.active === f ? "block" : "hidden"} p-1 text-muted hover:text-brand group-hover:block [@media(hover:none)]:block`} aria-label={`Đổi tên ${f}`}><Pencil size={12} /></button>
+              <button type="button" onClick={() => removeFile(f)} className={`${p.active === f ? "block" : "hidden"} p-1 pr-2 text-muted hover:text-bad group-hover:block [@media(hover:none)]:block`} aria-label={`Xóa ${f}`}><Trash2 size={12} /></button>
             </div>
           ))}
           {mode === "pw" && <p className="mt-2 px-2 font-sans text-[11px] leading-relaxed text-muted">Tệp *.spec.ts là file test. Mở một spec rồi bấm Chạy. Các tệp khác được import qua lại như dự án thật. Dự án mẫu có 1 test cố ý fail trong login.spec.ts để bạn tập sửa.</p>}
