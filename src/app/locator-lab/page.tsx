@@ -29,13 +29,17 @@ export default function LocatorLab() {
   const [url, setUrl] = useState("https://sokhach.playforge.dev/customers");
   const [tick, setTick] = useState(0);
 
+  // buildLocator dùng new Function: Cloudflare Workers chặn khi render phía server → chỉ dựng ở trình duyệt
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const built = useMemo(() => {
+    if (!mounted) return { b: null, e: "" };
     try {
       return { b: buildLocator(expr), e: "" };
     } catch (e) {
       return { b: null, e: (e as Error).message };
     }
-  }, [expr]);
+  }, [expr, mounted]);
   const score = built.b ? scoreLocator(built.b) : null;
 
   const doc = () => {

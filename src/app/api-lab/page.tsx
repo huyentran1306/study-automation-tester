@@ -118,6 +118,21 @@ export default function ApiLab() {
     setBusy(true);
     setErr("");
     const h: Record<string, string> = { "x-lab-user": getLabUser(), ...authHeaders() };
+    // Bearer mà chưa có token: tự gọi POST /auth/login trước (giống code TypeScript sinh ra), tránh 401 khó hiểu ở lần gửi đầu
+    if (auth === "bearer" && !token && path !== "/auth/login") {
+      try {
+        const t0 = performance.now();
+        const lr = await fetch(LAB_BASE + "/auth/login", { method: "POST", headers: { "x-lab-user": getLabUser(), "content-type": "application/json" }, body: JSON.stringify({ email: "linh@sokhach.vn", password: "Matkhau@123" }) });
+        const lj = (await lr.json().catch(() => null)) as { token?: string } | null;
+        setHistory((cur) => [{ m: "POST" as Method, path: "/auth/login", status: lr.status, ms: Math.round(performance.now() - t0) }, ...cur].slice(0, 12));
+        if (lr.ok && lj?.token) {
+          setToken(lj.token);
+          h.Authorization = `Bearer ${lj.token}`;
+        }
+      } catch {
+        /* để request chính tự báo lỗi */
+      }
+    }
     headers.filter((x) => x.on && x.k).forEach((x) => { h[x.k] = x.v; });
     if (chaos) h["x-chaos"] = chaos;
     const hasBody = method !== "GET" && method !== "DELETE" && body.trim();
@@ -285,7 +300,7 @@ export default function ApiLab() {
                 {([["none", "Không xác thực"], ["bearer", "Bearer token (lấy từ POST /auth/login)"], ["basic", "Basic Auth (linh@sokhach.vn)"], ["apikey", "API key (x-api-key)"]] as const).map(([k, l]) => (
                   <label key={k} className="flex items-center gap-2"><input type="radio" name="auth" checked={auth === k} onChange={() => setAuth(k)} className="accent-[#2563C9]" />{l}</label>
                 ))}
-                {auth === "bearer" && <span className={`font-mono text-[11.5px] ${token ? "text-ok-dark" : "text-warn-dark"}`}>{token ? `token: ${token.slice(0, 32)}…` : "Chưa có token. Gửi POST /auth/login trước."}</span>}
+                {auth === "bearer" && <span className={`font-mono text-[11.5px] ${token ? "text-ok-dark" : "text-warn-dark"}`}>{token ? `token: ${token.slice(0, 32)}…` : "Chưa có token. Bấm Gửi sẽ tự gọi POST /auth/login để lấy token."}</span>}
               </div>
             )}
             {err && <span className="text-sm text-bad-dark" role="alert">{err}</span>}
