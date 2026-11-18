@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowLeft, CheckCircle2, Loader2, Play, RotateCcw, Send, Sparkles } from "lucide-react";
 import { useApp } from "@/lib/progress/store";
 import { getKata, katasOfLesson } from "@/content";
-import { getLesson } from "@/lib/curriculum";
+import { codeExt, getLesson } from "@/lib/curriculum";
 import { earnedXp, KATA_TYPE_LABEL, KATA_TYPE_STYLE } from "@/lib/kata";
 import { MdBlock } from "@/components/md";
 import { CodeEditor } from "@/components/code/editor";
@@ -219,7 +219,7 @@ export default function KataSolve() {
                 </div>
               </div>
               <div className="h-[420px]">
-                <CodeEditor value={code} onChange={onCode} path={`file:///kata/${kata.id}.ts`} onRun={() => run(false)} errorLine={out?.error?.line} fontSize={state.settings.editorFont} />
+                <CodeEditor value={code} onChange={onCode} language={codeExt(kata.lesson) === "js" ? "javascript" : "typescript"} path={`file:///kata/${kata.id}.${codeExt(kata.lesson)}`} onRun={() => run(false)} errorLine={out?.error?.line} fontSize={state.settings.editorFont} />
               </div>
               <div className="max-h-[360px] min-h-[120px] overflow-auto border-t border-line">
                 <OutputPanel out={out} running={!!running} empty="Chạy thử để xem console.log. Nộp bài để chạy test ẩn." />

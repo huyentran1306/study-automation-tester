@@ -35,7 +35,7 @@ export function Playground({ code, setCode, initial, fileName = "main.ts", heigh
         </div>
       </div>
       <div style={{ height }}>
-        <CodeEditor value={code} onChange={setCode} language="typescript" path={`file:///lesson/${fileName}`} onRun={run} errorLine={out?.error?.line} fontSize={state.settings.editorFont} />
+        <CodeEditor value={code} onChange={setCode} language={fileName.endsWith(".js") ? "javascript" : "typescript"} path={`file:///lesson/${fileName}`} onRun={run} errorLine={out?.error?.line} fontSize={state.settings.editorFont} />
       </div>
       <div className="max-h-[260px] min-h-[96px] overflow-auto border-t border-line bg-white">
         <OutputPanel out={out} running={running} />

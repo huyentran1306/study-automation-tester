@@ -32,22 +32,55 @@ declare module '@playwright/test' {
     evaluate<R>(fn: (el: HTMLElement, arg?: any) => R, arg?: unknown): Promise<R>;
   }
   interface FrameLocator { getByRole: Locator['getByRole']; getByText: Locator['getByText']; getByLabel: Locator['getByLabel']; getByPlaceholder: Locator['getByPlaceholder']; getByTestId: Locator['getByTestId']; locator: Locator['locator']; frameLocator(selector: string): FrameLocator }
+  type Json = string | number | boolean | null | Json[] | { [k: string]: Json };
+  interface RequestOptions { data?: unknown; form?: Record<string, string | number | boolean>; multipart?: Record<string, string | number | boolean | { name: string; mimeType: string; buffer: unknown }>; params?: Record<string, string | number | boolean | undefined>; headers?: Record<string, string>; timeout?: number; failOnStatusCode?: boolean; method?: string }
+  interface APIResponse { status(): number; statusText(): string; ok(): boolean; url(): string; headers(): Record<string, string>; headersArray(): { name: string; value: string }[]; text(): Promise<string>; json(): Promise<any>; body(): Promise<Uint8Array>; dispose(): Promise<void> }
+  interface StorageState { cookies: { name: string; value: string; domain: string; path: string }[]; origins: { origin: string; localStorage: { name: string; value: string }[] }[] }
+  interface APIRequestContext {
+    get(url: string, options?: RequestOptions): Promise<APIResponse>; post(url: string, options?: RequestOptions): Promise<APIResponse>;
+    put(url: string, options?: RequestOptions): Promise<APIResponse>; patch(url: string, options?: RequestOptions): Promise<APIResponse>;
+    delete(url: string, options?: RequestOptions): Promise<APIResponse>; head(url: string, options?: RequestOptions): Promise<APIResponse>;
+    fetch(url: string, options?: RequestOptions): Promise<APIResponse>; dispose(): Promise<void>; storageState(options?: { path?: string }): Promise<StorageState>;
+  }
+  interface APIRequest { newContext(options?: { baseURL?: string; extraHTTPHeaders?: Record<string, string>; timeout?: number; storageState?: string }): Promise<APIRequestContext> }
+  interface Request { url(): string; method(): string; headers(): Record<string, string>; postData(): string | null; postDataJSON(): any }
+  interface Response { url(): string; status(): number; ok(): boolean; headers(): Record<string, string>; text(): Promise<string>; json(): Promise<any>; request(): Request }
+  interface Route {
+    request(): Request;
+    fulfill(options?: { status?: number; headers?: Record<string, string>; contentType?: string; body?: string; json?: unknown; response?: APIResponse }): Promise<void>;
+    continue(options?: { url?: string; method?: string; headers?: Record<string, string>; postData?: string }): Promise<void>;
+    fallback(options?: { url?: string; method?: string; headers?: Record<string, string>; postData?: string }): Promise<void>;
+    abort(errorCode?: string): Promise<void>;
+    fetch(options?: { url?: string; method?: string; headers?: Record<string, string>; postData?: string }): Promise<APIResponse>;
+  }
   interface Dialog { message(): string; type(): string; accept(promptText?: string): Promise<void>; dismiss(): Promise<void>; defaultValue(): string }
-  interface Download { suggestedFilename(): string; path(): Promise<string>; saveAs(path: string): Promise<void> }
+  interface Download { suggestedFilename(): string; url(): string; path(): Promise<string>; saveAs(path: string): Promise<void>; failure(): Promise<string | null> }
   interface Page extends Pick<Locator, 'getByRole'|'getByText'|'getByLabel'|'getByPlaceholder'|'getByAltText'|'getByTitle'|'getByTestId'|'locator'|'frameLocator'> {
     goto(url: string, options?: { waitUntil?: 'load'|'domcontentloaded'|'networkidle' }): Promise<null>;
     url(): string; title(): Promise<string>; reload(): Promise<null>; goBack(): Promise<null>; goForward(): Promise<null>;
     waitForTimeout(ms: number): Promise<void>; waitForURL(url: Pattern, options?: Timeout): Promise<void>; waitForLoadState(state?: string): Promise<void>;
     evaluate<R>(fn: (arg?: any) => R, arg?: unknown): Promise<R>; content(): Promise<string>; pause(): Promise<void>; screenshot(options?: { path?: string; fullPage?: boolean }): Promise<unknown>;
     on(event: 'dialog', handler: (dialog: Dialog) => unknown): Page; once(event: 'dialog', handler: (dialog: Dialog) => unknown): Page;
-    waitForEvent(event: 'download'): Promise<Download>; waitForEvent(event: 'dialog'): Promise<Dialog>;
+    on(event: 'console' | 'request' | 'response', handler: (arg: any) => unknown): Page;
+    route(url: Pattern, handler: (route: Route, request: Request) => unknown, options?: { times?: number }): Promise<void>;
+    unroute(url: Pattern): Promise<void>; unrouteAll(): Promise<void>;
+    waitForResponse(url: Pattern, options?: Timeout): Promise<Response>; waitForRequest(url: Pattern, options?: Timeout): Promise<Request>;
+    request: APIRequestContext;
+    click(selector: string, options?: Timeout): Promise<void>; fill(selector: string, value: string): Promise<void>; textContent(selector: string): Promise<string | null>; isVisible(selector: string): Promise<boolean>;
+    waitForEvent(event: 'download', options?: Timeout): Promise<Download>; waitForEvent(event: 'dialog', options?: Timeout): Promise<Dialog>;
     keyboard: { press(key: string): Promise<void>; type(text: string): Promise<void>; down(key: string): Promise<void>; up(key: string): Promise<void> };
     mouse: { click(x: number, y: number): Promise<void>; move(x: number, y: number): Promise<void> };
     context(): BrowserContext;
   }
-  interface BrowserContext { pages(): Page[]; newPage(): Promise<Page>; clearCookies(): Promise<void>; storageState(options?: { path?: string }): Promise<unknown> }
-  interface Fixtures { page: Page; context: BrowserContext; browserName: 'chromium'|'firefox'|'webkit'; baseURL: string }
-  interface TestInfo { title: string }
+  interface BrowserContext { pages(): Page[]; newPage(): Promise<Page>; clearCookies(): Promise<void>; storageState(options?: { path?: string }): Promise<StorageState>; waitForEvent(event: 'download'): Promise<Download>; close(): Promise<void> }
+  interface Fixtures { page: Page; context: BrowserContext; request: APIRequestContext; browserName: 'chromium'|'firefox'|'webkit'; baseURL: string }
+  interface TestInfo {
+    title: string; titlePath: string[]; retry: number; repeatEachIndex: number; workerIndex: number; project: { name: string }; tags: string[];
+    annotations: { type: string; description?: string }[];
+    attach(name: string, options: { body?: string | Uint8Array; path?: string; contentType?: string }): Promise<void>;
+    skip(condition?: boolean, description?: string): void; fixme(condition?: boolean, description?: string): void; slow(condition?: boolean): void;
+    setTimeout(ms: number): void; outputPath(...segments: string[]): string;
+  }
   type TestBody<T> = (args: Fixtures & T, testInfo: TestInfo) => Promise<void> | void;
   interface TestType<T> {
     (title: string, body: TestBody<T>): void;
@@ -67,19 +100,26 @@ declare module '@playwright/test' {
     toHaveAttribute(name: string, value?: Pattern, o?: Timeout): Promise<void>; toHaveClass(v: Pattern, o?: Timeout): Promise<void>; toHaveId(id: string): Promise<void>; toHaveCSS(name: string, value: Pattern): Promise<void>; toHaveAccessibleName(name: Pattern): Promise<void>;
   }
   interface PageMatchers { toHaveURL(url: Pattern, o?: Timeout): Promise<void>; toHaveTitle(title: Pattern, o?: Timeout): Promise<void> }
-  interface ValueMatchers { toBe(v: unknown): void; toEqual(v: unknown): void; toMatchObject(v: unknown): void; toBeTruthy(): void; toBeFalsy(): void; toBeNull(): void; toBeUndefined(): void; toBeDefined(): void; toContain(v: unknown): void; toHaveLength(n: number): void; toThrow(e?: Pattern): void; toBeGreaterThan(n: number): void; toBeLessThan(n: number): void; toMatch(p: Pattern): void }
+  interface ValueMatchers {
+    toBe(v: unknown): void; toEqual(v: unknown): void; toStrictEqual(v: unknown): void; toMatchObject(v: unknown): void; toBeTruthy(): void; toBeFalsy(): void; toBeNull(): void; toBeUndefined(): void; toBeDefined(): void; toBeNaN(): void;
+    toContain(v: unknown): void; toHaveLength(n: number): void; toHaveProperty(path: string, value?: unknown): void; toBeInstanceOf(c: unknown): void; toThrow(e?: Pattern): void;
+    toBeGreaterThan(n: number): void; toBeGreaterThanOrEqual(n: number): void; toBeLessThan(n: number): void; toBeLessThanOrEqual(n: number): void; toBeCloseTo(n: number, digits?: number): void; toMatch(p: Pattern): void;
+  }
+  interface ResponseMatchers extends ValueMatchers { toBeOK(): void }
   interface Expect {
     (actual: Locator, o?: Timeout): LocatorMatchers & { not: LocatorMatchers };
     (actual: Page, o?: Timeout): PageMatchers & { not: PageMatchers };
+    (actual: APIResponse | Response): ResponseMatchers & { not: ResponseMatchers };
     <V>(actual: V): ValueMatchers & { not: ValueMatchers };
-    soft: Expect;
+    soft: Expect; configure(o: { timeout?: number; soft?: boolean }): Expect;
     poll<V>(fn: () => V | Promise<V>, o?: Timeout): ValueMatchers & { not: ValueMatchers };
   }
   export const test: TestType<{}>;
   export const expect: Expect;
+  export const request: APIRequest;
   export function defineConfig<T>(c: T): T;
   export function mergeTests<A, B>(a: TestType<A>, b: TestType<B>): TestType<A & B>;
   export const devices: Record<string, Record<string, unknown>>;
-  export type { Page, Locator, FrameLocator, BrowserContext, Dialog, Download, TestInfo };
+  export type { Page, Locator, FrameLocator, BrowserContext, Dialog, Download, TestInfo, APIRequestContext, APIResponse, Route, Request, Response };
 }
 `;

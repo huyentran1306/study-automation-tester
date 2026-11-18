@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import { PW_TYPES } from "./pw-types";
 
 const EXTRA_LIB = `
+// Node: process.env cho bài .env (worker có shim process.env)
+declare var process: { env: Record<string, string | undefined> };
 declare function test(name: string, fn: () => unknown | Promise<unknown>): void;
 declare function describe(name: string, fn: () => void): void;
 interface PFMatchers { toBe(v: unknown): void; toEqual(v: unknown): void; toMatchObject(v: unknown): void; toBeTruthy(): void; toBeFalsy(): void; toBeNull(): void; toBeUndefined(): void; toBeDefined(): void; toContain(v: unknown): void; toHaveLength(n: number): void; toThrow(e?: string | RegExp): void; toBeGreaterThan(n: number): void; toBeLessThan(n: number): void; toBeCloseTo(n: number, digits?: number): void; toMatch(re: string | RegExp): void; toBeInstanceOf(c: unknown): void; }
@@ -52,10 +54,12 @@ const beforeMount: BeforeMount = (monaco) => {
   };
   ts.typescriptDefaults.setCompilerOptions(opts);
   ts.javascriptDefaults.setCompilerOptions(opts);
-  // 1375/1378: top-level await; 2451/2393/2300: trùng tên giữa các file độc lập; 7006/7031: tham số chưa khai kiểu (JS)
-  const ignore = [1375, 1378, 2451, 2393, 2300, 1208, 2307, 2792, 80001, 80005, 7044];
+  // 1375/1378: top-level await; 2451/2393/2300: trùng tên giữa các file độc lập;
+  // 7006/7031: tham số chưa khai kiểu. Editor không resolve được import giữa các tệp của dự án
+  // (vd '../fixtures/base'), nên fixture tự định nghĩa như { loginPage } bị coi là any → gạch đỏ oan.
+  const ignore = [1375, 1378, 2451, 2393, 2300, 1208, 2307, 2792, 80001, 80005, 7044, 7006, 7031, 2732];
   ts.typescriptDefaults.setDiagnosticsOptions({ diagnosticCodesToIgnore: ignore });
-  ts.javascriptDefaults.setDiagnosticsOptions({ diagnosticCodesToIgnore: [...ignore, 7006, 7031] });
+  ts.javascriptDefaults.setDiagnosticsOptions({ diagnosticCodesToIgnore: ignore });
   ts.typescriptDefaults.addExtraLib(EXTRA_LIB, "file:///pf-globals.d.ts");
   ts.javascriptDefaults.addExtraLib(EXTRA_LIB, "file:///pf-globals.d.ts");
   ts.typescriptDefaults.addExtraLib(PW_TYPES, "file:///node_modules/@playwright/test/index.d.ts");

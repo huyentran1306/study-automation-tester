@@ -21,6 +21,12 @@ export interface ChapterMeta {
   lessons: LessonMeta[];
 }
 
+/** Bài 1–9 dạy JavaScript thuần nên editor kiểm tra theo JS; từ bài 10 (TypeScript) trở đi mới bắt lỗi kiểu. */
+export function codeExt(lessonId: string): "js" | "ts" {
+  const n = Number(lessonId.slice(1));
+  return n >= 1 && n <= 9 ? "js" : "ts";
+}
+
 const C: Array<Omit<ChapterMeta, "lessons" | "n"> & { lessons: Array<[string, PracticeKind]> }> = [
   {
     name: "JavaScript & TypeScript cho tester + Git",

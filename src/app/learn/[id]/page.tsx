@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, Check, CheckCircle2 } from "lucide-react";
 import { useApp } from "@/lib/progress/store";
-import { COURSE_START, LESSONS, fmtDateVi, getChapter, getLesson, sessionDate, sessionOfLesson } from "@/lib/curriculum";
+import { COURSE_START, LESSONS, codeExt, fmtDateVi, getChapter, getLesson, sessionDate, sessionOfLesson } from "@/lib/curriculum";
 import { getLessonContent, katasOfLesson } from "@/content";
 import { BlockView } from "@/components/lesson/blocks";
 import { Playground } from "@/components/code/playground";
@@ -154,7 +154,7 @@ export default function LessonPage() {
                   ) : content.pw ? (
                     <PwPlayground code={code} setCode={setCode} initial={content.starter ?? initial} fileName={`tests/bai-${meta.n}.spec.ts`} />
                   ) : (
-                    <Playground code={code} setCode={setCode} initial={content.starter ?? initial} fileName={`bai-${meta.n}.ts`} height={360} />
+                    <Playground code={code} setCode={setCode} initial={content.starter ?? initial} fileName={`bai-${meta.n}.${codeExt(meta.id)}`} height={360} />
                   )}
                 </div>
               </div>
